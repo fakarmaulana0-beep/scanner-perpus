@@ -287,22 +287,7 @@ async function muatKamera() {
     });
 
     // Prioritaskan kamera belakang
-    const belakang = cameras.find(cam =>
-      /back|rear|environment|belakang/i.test(cam.label)
-    );
-
-    if (belakang) {
-      cameraSelect.value = belakang.id;
-    }
-
-    status('Kamera ditemukan: ' + cameras.length);
-
-  } catch (err) {
-
-    status('Gagal memuat kamera: ' + err.message);
-
-  }
-}
+    cameraSelect.value = cameras[0].id;
 
 // MEMULAI SCANNER
 async function mulaiScanner() {
@@ -329,9 +314,9 @@ async function mulaiScanner() {
     // gunakan ID kamera tersebut.
     // Jika tidak, gunakan kamera belakang.
     const pilihanKamera = cameraSelect.value
-      ? cameraSelect.value
-      : { facingMode: 'environment' };
-
+  ? cameraSelect.value
+  : { facingMode: 'user' };
+    
     await scanner.start(
 
       pilihanKamera,
