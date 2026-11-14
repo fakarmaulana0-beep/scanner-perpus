@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scanner QR Perpustakaan</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 20px auto;
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    button, select {
+      padding: 12px;
+      border: 0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .danger {
+      background: #dc2626;
+    }
+
+    .success {
+      background: #16a34a;
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      background: white;
+      margin: 8px 0;
+    }
+
+    #reader {
+      width: 100%;
+      margin: 15px auto;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    #status {
+      padding: 12px;
+      background: #eff6ff;
+      border-radius: 6px;
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    #result {
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      word-break: break-all;
+      min-height: 45px;
+    }
+
+    .hint {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>📚 Scanner QR Perpustakaan</h2>
+
+  <p class="hint">
+    Pilih jenis QR yang akan dipindai.
+    Izinkan akses kamera ketika browser meminta izin.
+  </p>
+
+  <div class="buttons">
+    <button onclick="pilihMode('anggota')">
+      Scan Anggota
+    </button>
+
+    <button onclick="pilihMode('buku')">
+      Scan Buku
+    </button>
+
+    <button onclick="pilihMode('kembali')">
+      Scan Pengembalian
+    </button>
+  </div>
+
+  <label for="camera">Pilih Kamera:</label>
+  <select id="camera">
+    <option value="">Pilih kamera</option>
+  </select>
+
+  <div class="buttons">
+    <button class="success" onclick="mulaiScanner()">
+      Buka Kamera
+    </button>
+
+    <button class="danger" onclick="matikanScanner()">
+      Matikan Kamera
+    </button>
+  </div>
+
+  <div id="status">Status: Kamera belum aktif</div>
+
+  <div id="reader"></div>
+
+  <h3>Hasil Scan:</h3>
+  <div id="result">Belum ada QR yang dipindai.</div>
+
+  <div class="buttons">
+    <button onclick="salinHasil()">Salin Hasil</button>
+    <button class="success" onclick="kirimUlang()">
+      Kirim Hasil
+    </button>
+  </div>
+
+  <p class="hint">
+    Jika kamera tidak muncul, pastikan website menggunakan
+    HTTPS dan izin kamera browser sudah diaktifkan.
+  </p>
+</div>
+
+<script>
+  let scanner = null;
+  let modeAktif = 'anggota';
+  let hasilScan = '';
+  let kameraAktif = false;
+
+  const cameraSelect = document.getElementById('camera');
+  const statusBox = document.getElementById('status');
+  const resultBox = document.getElementById('result');
+
+  function status(teks) {
+    statusBox.textContent = teks;
+  }
+
+  function pilihMode(mode) {
+    modeAktif = mode;
+
+    const nama = {
+      anggota: 'Anggota',
+      buku: 'Buku',
+      kembali: 'Pengembalian'
+    };
+
+    status('Mode scan: ' + nama[mode]);
+  }
+
+  async function daftarKamera() {
+    try {
+      if (!window.isSecureContext) {
+        throw new Error('Halaman harus dibuka melalui HTTPS.');
+      }
+
+      if (!navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Browser tidak mendukung akses kamera.');
+      }
+
+      status('Meminta izin kamera...');
+
+      // Meminta izin agar label kamera dapat dibaca.
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+
+      stream.getTracks().forEach(track => track.stop());
+
+      const cameras = await Html5Qrcode.getCameras();
+
+      cameraSelect.innerHTML = '';
+
+      if (!cameras.length) {
+        throw new Error('Kamera tidak ditemukan.');
+      }
+
+      cameras.forEach((cam, index) => {
+        const option = document.createElement('option');
+        option.value = cam.id;
+        option.textContent = cam.label || 'Kamera ' + (index + 1);
+        cameraSelect.appendChild(option);
+      });
+
+      // Prioritaskan kamera belakang pada HP.
+      const belakang = cameras.find(cam =>
+        /back|rear|environment|belakang/i.test(cam.label)
+      );
+
+      if (belakang) {
+        cameraSelect.value = belakang.id;
+      }
+
+      status('Kamera ditemukan. Silakan buka kamera.');
+
+    } catch (err) {
+      status('Gagal mengakses kamera: ' + err.message);
+    }
+  }
+
+  async function mulaiScanner() {
+    if (kameraAktif) {
+      await matikanScanner();
+    }
+
+    try {
+      if (!cameraSelect.value) {
+        await daftarKamera();
+      }
+
+      if (!cameraSelect.value) return;
+
+      if (!scanner) {
+        scanner = new Html5Qrcode('reader');
+      }
+
+      status('Mengaktifkan kamera...');
+
+      await scanner.start(
+        cameraSelect.value,
+        {
+          fps: 10,
+          qrbox: function(width, height) {
+            const ukuran = Math.min(width, height, 250);
+            return {
+              width: ukuran,
+              height: ukuran
+            };
+          },
+          aspectRatio: 1
+        },
+        function(decodedText) {
+          hasilScan = decodedText;
+          resultBox.textContent = decodedText;
+
+          status('QR berhasil dibaca!');
+
+          kirimHasil();
+
+          matikanScanner();
+        },
+        function(errorMessage) {
+          // Frame tanpa QR diabaikan.
+        }
+      );
+
+      kameraAktif = true;
+      status('Kamera aktif. Arahkan QR ke kamera.');
+
+    } catch (err) {
+      kameraAktif = false;
+      status('Kamera gagal dibuka: ' + err.message);
+    }
+  }
+
+  async function matikanScanner() {
+    if (scanner && kameraAktif) {
+      try {
+        await scanner.stop();
+        status('Kamera berhasil dimatikan.');
+      } catch (err) {
+        status('Gagal mematikan kamera: ' + err.message);
+      }
+    }
+
+    kameraAktif = false;
+  }
+
+  function kirimHasil() {
+    if (!hasilScan) {
+      alert('Belum ada hasil scan!');
+      return;
+    }
+
+    const data = {
+      type: 'PERPUS_QR_SCAN',
+      target: modeAktif,
+      value: hasilScan
+    };
+
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(
+        data,
+        '*'
+      );
+      status('Hasil scan dikirim ke aplikasi utama.');
+    } else {
+      status('Hasil scan tersedia. Silakan salin hasilnya.');
+    }
+  }
+
+  function kirimUlang() {
+    kirimHasil();
+  }
+
+  async function salinHasil() {
+    if (!hasilScan) {
+      alert('Belum ada hasil scan!');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(hasilScan);
+      alert('Hasil scan berhasil disalin!');
+    } catch (err) {
+      alert('Gagal menyalin. Silakan salin hasil secara manual.');
+    }
+  }
+
+  window.addEventListener('load', daftarKamera);
+
+  window.addEventListener('beforeunload', function() {
+    if (scanner && kameraAktif) {
+      scanner.stop();
+    }
+  });
+</script>
+
+</body>
+</html>
