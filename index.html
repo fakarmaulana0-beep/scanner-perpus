@@ -31,7 +31,7 @@ body {
   box-shadow: 0 3px 12px rgba(0,0,0,.08);
 }
 
-h2 {
+h2, h3 {
   text-align: center;
 }
 
@@ -59,13 +59,8 @@ button:disabled {
   opacity: .5;
 }
 
-.success {
-  background: #16a34a;
-}
-
-.danger {
-  background: #dc2626;
-}
+.success { background: #16a34a; }
+.danger { background: #dc2626; }
 
 select {
   width: 100%;
@@ -83,17 +78,12 @@ select {
   background: #111827;
 }
 
-/* Tampilan video kamera */
 #reader video {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  object-fit: contain !important;
   display: block;
-}
-
-#reader img {
-  max-width: 100%;
+  object-fit: contain;
 }
 
 #status {
@@ -121,19 +111,9 @@ select {
 }
 
 @media(max-width:480px) {
-  body {
-    padding: 5px;
-  }
-
-  .container {
-    padding: 14px;
-    margin: 5px auto;
-  }
-
-  button {
-    flex: 1;
-    min-width: 100px;
-  }
+  body { padding: 5px; }
+  .container { padding: 14px; margin: 5px auto; }
+  button { flex: 1; min-width: 100px; }
 }
 </style>
 </head>
@@ -146,68 +126,43 @@ select {
 
 <p class="hint">
 Pilih jenis QR yang ingin dipindai.
-Pastikan browser sudah mendapatkan izin kamera.
+Izinkan akses kamera pada browser.
 </p>
 
 <div class="buttons">
-  <button onclick="pilihMode('anggota')">
-    Scan Anggota
-  </button>
-
-  <button onclick="pilihMode('buku')">
-    Scan Buku
-  </button>
-
-  <button onclick="pilihMode('kembali')">
-    Pengembalian
-  </button>
+  <button onclick="pilihMode('anggota')">Scan Anggota</button>
+  <button onclick="pilihMode('buku')">Scan Buku</button>
+  <button onclick="pilihMode('kembali')">Pengembalian</button>
 </div>
 
 <label for="camera"><b>Pilih Kamera:</b></label>
 
 <select id="camera">
-  <option value="">Otomatis (Kamera Belakang)</option>
+  <option value="">Pilih otomatis</option>
 </select>
 
 <div class="buttons">
-  <button onclick="muatKamera()">
-    Muat Kamera
-  </button>
-
-  <button class="success" onclick="mulaiScanner()">
-    Buka Kamera
-  </button>
-
-  <button class="danger" onclick="matikanScanner()">
-    Matikan Kamera
-  </button>
+  <button onclick="muatKamera()">Muat Kamera</button>
+  <button class="success" onclick="mulaiScanner()">Buka Kamera</button>
+  <button class="danger" onclick="matikanScanner()">Matikan Kamera</button>
 </div>
 
-<div id="status">
-Status: Kamera belum aktif
-</div>
+<div id="status">Status: Kamera belum aktif</div>
 
 <div id="reader"></div>
 
 <h3>Hasil Scan:</h3>
 
-<div id="result">
-Belum ada QR yang dipindai.
-</div>
+<div id="result">Belum ada QR yang dipindai.</div>
 
 <div class="buttons">
-  <button onclick="salinHasil()">
-    Salin Hasil
-  </button>
-
-  <button class="success" onclick="kirimUlang()">
-    Kirim Hasil
-  </button>
+  <button onclick="salinHasil()">Salin Hasil</button>
+  <button class="success" onclick="kirimUlang()">Kirim Hasil</button>
 </div>
 
 <p class="hint">
-Tips: Gunakan kamera belakang HP untuk hasil pemindaian
-yang lebih mudah. Pastikan QR berada di dalam kotak scanner.
+Laptop menggunakan webcam. HP akan memprioritaskan kamera belakang.
+Pastikan QR berada di dalam area scanner.
 </p>
 
 </div>
@@ -228,9 +183,8 @@ function status(teks) {
   statusBox.textContent = teks;
 }
 
-// PILIH MODE SCAN
+// PILIH MODE
 function pilihMode(mode) {
-
   modeAktif = mode;
 
   const nama = {
@@ -244,7 +198,6 @@ function pilihMode(mode) {
 
 // MEMUAT DAFTAR KAMERA
 async function muatKamera() {
-
   try {
 
     if (!window.isSecureContext) {
@@ -256,9 +209,12 @@ async function muatKamera() {
       throw new Error('Browser tidak mendukung kamera.');
     }
 
+    if (typeof Html5Qrcode === 'undefined') {
+      throw new Error('Library scanner gagal dimuat. Periksa koneksi internet.');
+    }
+
     status('Meminta izin kamera...');
 
-    // Izin kamera diperlukan agar nama perangkat terbaca.
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true
     });
@@ -271,23 +227,29 @@ async function muatKamera() {
       throw new Error('Kamera tidak ditemukan.');
     }
 
-    cameraSelect.innerHTML =
-      '<option value="">Otomatis (Kamera Belakang)</option>';
+    cameraSelect.innerHTML = '';
 
     cameras.forEach((cam, index) => {
-
       const option = document.createElement('option');
-
       option.value = cam.id;
-      option.textContent =
-        cam.label || 'Kamera ' + (index + 1);
-
+      option.textContent = cam.label || 'Kamera ' + (index + 1);
       cameraSelect.appendChild(option);
-
     });
 
-    // Prioritaskan kamera belakang
-    cameraSelect.value = cameras[0].id;
+    // Prioritaskan kamera belakang HP.
+    // Jika laptop, gunakan webcam yang tersedia.
+    const kameraPilihan = cameras.find(cam =>
+      /back|rear|environment|belakang/i.test(cam.label)
+    ) || cameras[0];
+
+    cameraSelect.value = kameraPilihan.id;
+
+    status('Kamera ditemukan: ' + kameraPilihan.label);
+
+  } catch (err) {
+    status('Gagal memuat kamera: ' + err.message);
+  }
+}
 
 // MEMULAI SCANNER
 async function mulaiScanner() {
@@ -302,6 +264,15 @@ async function mulaiScanner() {
       throw new Error('Gunakan website melalui HTTPS.');
     }
 
+    if (typeof Html5Qrcode === 'undefined') {
+      throw new Error('Library scanner belum berhasil dimuat.');
+    }
+
+    // Muat daftar kamera jika belum tersedia.
+    if (!cameraSelect.value) {
+      await muatKamera();
+    }
+
     if (!scanner) {
       scanner = new Html5Qrcode('reader');
     }
@@ -310,35 +281,27 @@ async function mulaiScanner() {
 
     status('Mengaktifkan kamera...');
 
-    // Jika pengguna memilih kamera tertentu
-    // gunakan ID kamera tersebut.
-    // Jika tidak, gunakan kamera belakang.
+    // Gunakan kamera pilihan.
+    // Jika tidak tersedia, prioritaskan kamera belakang.
     const pilihanKamera = cameraSelect.value
-  ? cameraSelect.value
-  : { facingMode: 'user' };
-    
+      ? cameraSelect.value
+      : { facingMode: 'environment' };
+
     await scanner.start(
-
       pilihanKamera,
-
       {
         fps: 10,
-
         qrbox: function(width, height) {
-
-          const ukuran = Math.min(
-            width * 0.8,
-            height * 0.8,
-            280
+          const ukuran = Math.floor(
+            Math.min(width * 0.8, height * 0.8, 280)
           );
 
           return {
-            width: Math.floor(ukuran),
-            height: Math.floor(ukuran)
+            width: ukuran,
+            height: ukuran
           };
-
-        }
-
+        },
+        aspectRatio: 1
       },
 
       // KETIKA QR BERHASIL DIBACA
@@ -349,7 +312,6 @@ async function mulaiScanner() {
         sedangMemproses = true;
 
         hasilScan = decodedText;
-
         resultBox.textContent = decodedText;
 
         status('QR berhasil dibaca!');
@@ -357,12 +319,11 @@ async function mulaiScanner() {
         await matikanScanner();
 
         kirimHasil();
-
       },
 
-      // Frame tanpa QR diabaikan
-      function(errorMessage) {}
-
+      function(errorMessage) {
+        // Frame tanpa QR diabaikan.
+      }
     );
 
     kameraAktif = true;
@@ -376,14 +337,12 @@ async function mulaiScanner() {
     status('Kamera gagal dibuka: ' + err.message);
 
   }
-
 }
 
 // MEMATIKAN KAMERA
 async function matikanScanner() {
 
   if (scanner && kameraAktif) {
-
     try {
 
       await scanner.stop();
@@ -399,12 +358,10 @@ async function matikanScanner() {
       status('Gagal mematikan kamera: ' + err.message);
 
     }
-
   }
-
 }
 
-// MENGIRIM HASIL SCAN KE HALAMAN PEMBUKA
+// MENGIRIM HASIL SCAN
 function kirimHasil() {
 
   if (!hasilScan) return;
@@ -423,10 +380,9 @@ function kirimHasil() {
 
   } else {
 
-    status('QR terbaca. Hasil dapat disalin.');
+    status('QR terbaca. Silakan salin hasil scan.');
 
   }
-
 }
 
 // KIRIM ULANG
@@ -438,7 +394,6 @@ function kirimUlang() {
   }
 
   kirimHasil();
-
 }
 
 // SALIN HASIL
@@ -457,17 +412,16 @@ async function salinHasil() {
 
   } catch (err) {
 
-    alert('Gagal menyalin hasil scan.');
+    alert('Gagal menyalin. Periksa izin clipboard browser.');
 
   }
-
 }
 
-// MEMBERSIHKAN KAMERA SAAT HALAMAN DITUTUP
+// MEMBERSIHKAN KAMERA
 window.addEventListener('pagehide', function() {
 
   if (scanner && kameraAktif) {
-    scanner.stop();
+    scanner.stop().catch(function() {});
   }
 
 });
