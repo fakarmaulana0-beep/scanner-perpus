@@ -6,11 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scanner QR Perpustakaan</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
-
 <style>
 *{box-sizing:border-box;font-family:Arial,sans-serif}
 body{margin:0;padding:15px;background:#f1f5f9;color:#1e293b}
-.container{max-width:650px;width:100%;margin:15px auto;padding:22px;background:white;border-radius:16px;box-shadow:0 4px 20px #00000012}
+.container{max-width:650px;width:100%;margin:15px auto;padding:22px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.07)}
 .header{text-align:center;margin-bottom:20px}
 .logo{font-size:45px}
 h2{margin:8px 0;color:#172554}
@@ -19,7 +18,7 @@ h2{margin:8px 0;color:#172554}
 #reader{width:100%;min-height:250px;overflow:hidden;border-radius:12px;background:#111827;margin:15px auto}
 #reader video{width:100%!important;max-width:100%!important;display:block;object-fit:cover}
 .buttons{display:flex;gap:10px;margin-top:15px}
-button{flex:1;padding:13px 15px;border:none;border-radius:9px;font-size:14px;font-weight:bold;cursor:pointer}
+button{flex:1;padding:13px 15px;border:0;border-radius:9px;font-size:14px;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.5;cursor:not-allowed}
 .start{background:#16a34a;color:white}
 .stop{background:#dc2626;color:white}
@@ -29,29 +28,18 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .result-value{color:#2563eb;font-weight:bold}
 .info{margin-top:18px;padding:14px;background:#f0fdf4;border-radius:10px;color:#166534;font-size:13px;line-height:1.7}
 .footer{text-align:center;color:#94a3b8;font-size:12px;margin-top:20px}
-@media(max-width:480px){
-body{padding:6px}
-.container{padding:15px;margin:5px auto}
-.buttons{flex-direction:column}
-}
+@media(max-width:480px){body{padding:6px}.container{padding:15px;margin:5px auto}.buttons{flex-direction:column}}
 </style>
 </head>
-
 <body>
 <div class="container">
   <div class="header">
     <div class="logo">📚</div>
     <h2>Scanner QR Perpustakaan</h2>
-    <p class="description">
-      Scanner otomatis untuk membaca QR anggota dan QR buku.
-      Tidak perlu memilih jenis transaksi secara manual.
-    </p>
+    <p class="description">Scanner otomatis untuk membaca QR anggota dan QR buku. Tidak perlu memilih jenis transaksi secara manual.</p>
   </div>
 
-  <div id="status" class="status">
-    Kamera belum aktif. Tekan tombol Mulai Scanner.
-  </div>
-
+  <div id="status" class="status">Kamera belum aktif. Tekan tombol Mulai Scanner.</div>
   <div id="reader"></div>
 
   <div class="buttons">
@@ -75,7 +63,7 @@ body{padding:6px}
     2. Arahkan kamera ke QR anggota atau buku.<br>
     3. Hasil scan otomatis dikirim ke aplikasi perpustakaan.<br>
     4. Kamera tetap aktif untuk scan berikutnya.<br>
-    5. Untuk mengembalikan buku, scan QR buku.
+    5. Buku tersedia masuk ke peminjaman, buku dipinjam masuk ke pengembalian.
   </div>
 
   <div class="footer">SISTEM INFORMASI PERPUSTAKAAN QR</div>
@@ -191,7 +179,9 @@ function kirimKeAplikasi(value){
   };
 
   if(window.opener&&!window.opener.closed){
-    window.opener.postMessage(data,'https://script.google.com');
+    // '*' diperlukan karena halaman Apps Script dapat memakai
+    // origin Google yang berbeda. Aplikasi utama memvalidasi origin pengirim.
+    window.opener.postMessage(data,'*');
     tampilkanStatus('✅ QR berhasil dikirim ke aplikasi perpustakaan.');
   }else{
     tampilkanStatus('Scanner tidak terhubung. Buka scanner dari aplikasi perpustakaan.');
