@@ -20,7 +20,7 @@
   --border-color: #e2e8f0;
 }
 
-* { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+*, *::before, *::after { box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
 body {
   margin: 0;
@@ -75,7 +75,6 @@ h2 {
 
 .description {
   color: var(--text-muted);
-  font-size: 135px;
   font-size: 13px;
   line-height: 1.5;
   margin: 0;
@@ -315,10 +314,7 @@ async function mulaiScanner() {
       kameraPilihan.id,
       {
         fps: 10,
-        qrbox: function(width, height) {
-          const ukuran = Math.floor(Math.min(width * 250, height * 0.8, 250));
-          return { width: ukuran, height: ukuran };
-        },
+        qrbox: { width: 250, height: 250 }, // Menggunakan ukuran statis yang stabil & aman
         aspectRatio: 1
       },
       function(decodedText) {
@@ -385,7 +381,6 @@ function kirimKeAplikasi(value) {
   };
 
   try {
-    // Kirim ke jendela induk (Apps Script Web App)
     window.opener.postMessage(dataPayload, '*');
 
     clearTimeout(timerBalasan);
@@ -404,16 +399,7 @@ function kirimKeAplikasi(value) {
   }
 }
 
-/* MENERIMA BALASAN DARI APPS SCRIPT (FIXED ORIGIN CHECK) */
 window.addEventListener('message', function(event) {
-  // Izinkan balasan dari domain google script / apps script
-  if (!event.origin.includes('script.google.com') && !event.origin.includes('googleusercontent.com')) {
-    // Abaikan origin yang tidak dikenal demi keamanan, tapi izinkan lokal jika testing
-    if (event.origin !== window.location.origin) {
-      // return; -> Diperlonggar sedikit agar mulus menerima postMessage dari Apps Script
-    }
-  }
-
   const data = event.data;
   if (!data || data.type !== 'PERPUS_QR_RESULT') {
     return;
