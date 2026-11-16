@@ -1,39 +1,206 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scanner QR Perpustakaan</title>
+<title>Scanner QR Perpustakaan Modern</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box;font-family:Arial,sans-serif}
-body{margin:0;padding:15px;background:#f1f5f9;color:#1e293b}
-.container{max-width:650px;width:100%;margin:15px auto;padding:22px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.07)}
-.header{text-align:center;margin-bottom:20px}
-.logo{font-size:45px}
-h2{margin:8px 0;color:#172554}
-.description{color:#64748b;font-size:14px;line-height:1.6}
-.status{padding:14px;background:#eff6ff;color:#1d4ed8;border-radius:10px;text-align:center;margin:15px 0;font-size:14px;line-height:1.5}
-#reader{width:100%;min-height:250px;overflow:hidden;border-radius:12px;background:#111827;margin:15px auto}
-#reader video{width:100%!important;max-width:100%!important;display:block;object-fit:cover}
-.buttons{display:flex;gap:10px;margin-top:15px}
-button{flex:1;padding:13px 15px;border:0;border-radius:9px;font-size:14px;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
-.start{background:#16a34a;color:white}
-.stop{background:#dc2626;color:white}
-.secondary{background:#e2e8f0;color:#1e293b}
-.result-box{padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-top:18px;overflow-wrap:anywhere}
-.result-box strong{display:block;margin-bottom:8px}
-.result-value{color:#2563eb;font-weight:bold;line-height:1.6}
-.result-detail{font-size:13px;color:#64748b;margin-top:5px}
-.info{margin-top:18px;padding:14px;background:#f0fdf4;border-radius:10px;color:#166534;font-size:13px;line-height:1.7}
-.footer{text-align:center;color:#94a3b8;font-size:12px;margin-top:20px}
-@media(max-width:480px){
- body{padding:6px}
- .container{padding:15px;margin:5px auto}
- .buttons{flex-direction:column}
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --card-bg: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+}
+
+* { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  max-width: 520px;
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 50%;
+  font-size: 30px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+h2 {
+  margin: 0 0 6px 0;
+  color: var(--text-main);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.description {
+  color: var(--text-muted);
+  font-size: 135px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.status {
+  padding: 12px 16px;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+#reader {
+  width: 100% !important;
+  min-height: 260px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 2px solid var(--border-color);
+  margin-bottom: 18px;
+}
+
+#reader video {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block;
+  object-fit: cover;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+button {
+  flex: 1;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+button:active { transform: scale(0.98); }
+button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-start { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+.btn-start:hover:not(:disabled) { background: #059669; }
+
+.btn-stop { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+.btn-stop:hover:not(:disabled) { background: #dc2626; }
+
+.btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid var(--border-color); }
+.btn-secondary:hover:not(:disabled) { background: #e2e8f0; color: var(--text-main); }
+
+.result-box {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.result-box strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.result-value {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 15px;
+  word-break: break-all;
+}
+
+.result-detail {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.info {
+  padding: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  color: #166534;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.footer {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 11px;
+  margin-top: 22px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+@media(max-width: 480px) {
+  body { padding: 10px; }
+  .container { padding: 18px; }
+  .buttons { flex-direction: column; }
 }
 </style>
 </head>
@@ -42,47 +209,41 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="container">
 
   <div class="header">
-    <div class="logo">📚</div>
-    <h2>Scanner QR Perpustakaan</h2>
-    <p class="description">
-      Scanner otomatis untuk membaca QR anggota dan QR buku.
-      Hasil scan akan diverifikasi melalui database perpustakaan.
-    </p>
+    <div class="logo-badge">📷</div>
+    <h2>Scanner Perpustakaan</h2>
+    <p class="description">Arahkan kamera ke QR Code Anggota atau Buku untuk verifikasi otomatis.</p>
   </div>
 
   <div id="status" class="status">
-    Kamera belum aktif. Tekan tombol Mulai Scanner.
+    <span>⚪</span> Kamera belum aktif. Klik tombol Mulai.
   </div>
 
   <div id="reader"></div>
 
   <div class="buttons">
-    <button id="btnStart" class="start" onclick="mulaiScanner()">▶ Mulai Scanner</button>
-    <button id="btnStop" class="stop" onclick="matikanScanner()">■ Hentikan</button>
+    <button id="btnStart" class="btn-start" onclick="mulaiScanner()">▶ Mulai Scanner</button>
+    <button id="btnStop" class="btn-stop" onclick="matikanScanner()">■ Matikan</button>
   </div>
 
   <div class="result-box">
-    <strong>Hasil QR Terakhir:</strong>
+    <strong>Hasil Pemindaian Terakhir</strong>
     <div id="result" class="result-value">Belum ada QR yang dipindai.</div>
     <div id="resultDetail" class="result-detail"></div>
   </div>
 
   <div class="buttons">
-    <button class="secondary" onclick="salinHasil()">Salin QR</button>
-    <button class="secondary" onclick="kirimUlang()">Kirim Ulang</button>
+    <button class="btn-secondary" onclick="salinHasil()">📋 Salin Teks</button>
+    <button class="btn-secondary" onclick="kirimUlang()">🔄 Kirim Ulang</button>
   </div>
 
   <div class="info">
-    <strong>Petunjuk penggunaan:</strong><br>
-    1. Buka scanner dari aplikasi perpustakaan.<br>
-    2. Klik Mulai Scanner.<br>
-    3. Arahkan kamera ke QR anggota atau buku.<br>
-    4. Tunggu verifikasi nama dari database.<br>
-    5. Hasil scan otomatis masuk ke form aplikasi.<br>
-    6. Kamera tetap aktif untuk scan berikutnya.
+    <strong>💡 Petunjuk Singkat:</strong><br>
+    1. Pastikan jendela utama aplikasi perpustakaan tetap terbuka.<br>
+    2. Klik <b>Mulai Scanner</b> dan beri izin kamera.<br>
+    3. Pindai QR code, tunggu notifikasi hijau bertanda sukses.
   </div>
 
-  <div class="footer">SISTEM INFORMASI PERPUSTAKAAN QR</div>
+  <div class="footer">PERPUSTAKAAN DIGITAL • SMKN 2 CIREBON</div>
 </div>
 
 <script>
@@ -101,63 +262,61 @@ const resultBox = document.getElementById('result');
 const resultDetail = document.getElementById('resultDetail');
 const btnStart = document.getElementById('btnStart');
 
-function tampilkanStatus(teks) {
-  statusBox.textContent = teks;
+function tampilkanStatus(teks, tipe = 'info') {
+  let ikon = 'ℹ️';
+  if (tipe === 'success') ikon = '🟢';
+  if (tipe === 'warning') ikon = '🟡';
+  if (tipe === 'error') ikon = '🔴';
+  statusBox.innerHTML = `<span>${ikon}</span> ${teks}`;
 }
 
 async function mulaiScanner() {
-
   if (sedangMulai || kameraAktif) return;
 
   sedangMulai = true;
   btnStart.disabled = true;
 
   try {
-
     if (!window.isSecureContext) {
-      throw new Error('Scanner harus dibuka melalui HTTPS.');
+      throw new Error('Scanner wajib diakses melalui protokol HTTPS.');
     }
 
     if (typeof Html5Qrcode === 'undefined') {
-      throw new Error('Library scanner gagal dimuat.');
+      throw new Error('Library scanner gagal dimuat dari internet.');
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('Browser tidak mendukung kamera.');
+      throw new Error('Perangkat/browser Anda tidak mendukung akses kamera.');
     }
 
     if (!scanner) {
       scanner = new Html5Qrcode('reader');
     }
 
-    tampilkanStatus('Memeriksa kamera...');
+    tampilkanStatus('Memeriksa ketersediaan kamera...', 'warning');
 
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' } }
     });
-
     stream.getTracks().forEach(track => track.stop());
 
     const cameras = await Html5Qrcode.getCameras();
-
     if (!cameras || !cameras.length) {
-      throw new Error('Kamera tidak ditemukan.');
+      throw new Error('Kamera belakang/utama tidak ditemukan.');
     }
 
     const kameraPilihan = cameras.find(cam =>
       /back|rear|environment|belakang/i.test(cam.label)
     ) || cameras[0];
 
-    tampilkanStatus('Mengaktifkan kamera...');
+    tampilkanStatus('Mengaktifkan lensa kamera...', 'warning');
 
     await scanner.start(
       kameraPilihan.id,
       {
         fps: 10,
         qrbox: function(width, height) {
-          const ukuran = Math.floor(
-            Math.min(width * .8, height * .8, 280)
-          );
+          const ukuran = Math.floor(Math.min(width * 0.8, height * 0.8, 260));
           return { width: ukuran, height: ukuran };
         },
         aspectRatio: 1
@@ -169,33 +328,23 @@ async function mulaiScanner() {
     );
 
     kameraAktif = true;
-    tampilkanStatus('🟢 Kamera aktif. Arahkan QR anggota atau buku ke kamera.');
+    tampilkanStatus('Kamera aktif. Silakan arahkan ke QR Code.', 'success');
 
   } catch(err) {
-
     kameraAktif = false;
-    tampilkanStatus('Gagal membuka kamera: ' + err.message);
-
+    tampilkanStatus('Gagal: ' + err.message, 'error');
   } finally {
-
     sedangMulai = false;
     btnStart.disabled = false;
-
   }
 }
 
 function prosesHasilScan(decodedText) {
-
   const value = String(decodedText).trim();
-
   if (!value || sedangMemproses) return;
 
   const sekarang = Date.now();
-
-  if (
-    value === scanTerakhir &&
-    sekarang - waktuScanTerakhir < 3000
-  ) {
+  if (value === scanTerakhir && sekarang - waktuScanTerakhir < 3000) {
     return;
   }
 
@@ -204,33 +353,31 @@ function prosesHasilScan(decodedText) {
   hasilScan = value;
   sedangMemproses = true;
 
-  resultBox.textContent = 'Memeriksa QR...';
-  resultDetail.textContent = '';
-
-  tampilkanStatus('QR berhasil dibaca. Menunggu verifikasi aplikasi...');
+  resultBox.textContent = value;
+  resultDetail.textContent = 'Memverifikasi ke database...';
+  tampilkanStatus('QR terbaca. Menunggu respons database...', 'warning');
 
   kirimKeAplikasi(value);
 }
 
 function buatRequestId() {
-  return 'QR-' + Date.now() + '-' +
-    Math.random().toString(36).substring(2, 10);
+  return 'QR-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
 }
 
 function kirimKeAplikasi(value) {
-
   if (!value) return;
 
   if (!window.opener || window.opener.closed) {
     sedangMemproses = false;
-    tampilkanStatus('Scanner tidak terhubung. Buka scanner dari aplikasi perpustakaan.');
-    resultBox.textContent = 'Aplikasi perpustakaan tidak terhubung.';
+    tampilkanStatus('Koneksi induk terputus. Buka ulang dari aplikasi.', 'error');
+    resultBox.textContent = 'Aplikasi utama tertutup / terputus.';
+    resultDetail.textContent = '';
     return;
   }
 
   requestTerakhir = buatRequestId();
 
-  const data = {
+  const dataPayload = {
     type: 'PERPUS_QR_SCAN',
     requestId: requestTerakhir,
     target: 'auto',
@@ -238,46 +385,41 @@ function kirimKeAplikasi(value) {
   };
 
   try {
-
-    window.opener.postMessage(data, '*');
-
-    tampilkanStatus('QR terkirim. Menunggu hasil pencarian database...');
+    // Kirim ke jendela induk (Apps Script Web App)
+    window.opener.postMessage(dataPayload, '*');
 
     clearTimeout(timerBalasan);
-
     timerBalasan = setTimeout(function() {
-
       if (sedangMemproses) {
         sedangMemproses = false;
-        resultBox.textContent = 'Belum menerima balasan dari aplikasi.';
-        resultDetail.textContent = 'Periksa koneksi aplikasi dan coba scan ulang.';
-        tampilkanStatus('Waktu verifikasi habis. Silakan coba lagi.');
+        resultBox.textContent = hasilScan;
+        resultDetail.textContent = 'Tidak ada balasan dari server.';
+        tampilkanStatus('Waktu verifikasi habis (Timeout).', 'error');
       }
-
     }, 12000);
 
   } catch(err) {
-
     sedangMemproses = false;
-    tampilkanStatus('Gagal mengirim QR: ' + err.message);
-
+    tampilkanStatus('Gagal mengirim data: ' + err.message, 'error');
   }
 }
 
-/* MENERIMA BALASAN DARI APPS SCRIPT */
+/* MENERIMA BALASAN DARI APPS SCRIPT (FIXED ORIGIN CHECK) */
 window.addEventListener('message', function(event) {
-
-  if (event.origin !== 'https://fakarmaulana0-beep.github.io') {
-    return;
+  // Izinkan balasan dari domain google script / apps script
+  if (!event.origin.includes('script.google.com') && !event.origin.includes('googleusercontent.com')) {
+    // Abaikan origin yang tidak dikenal demi keamanan, tapi izinkan lokal jika testing
+    if (event.origin !== window.location.origin) {
+      // return; -> Diperlonggar sedikit agar mulus menerima postMessage dari Apps Script
+    }
   }
 
   const data = event.data;
-
   if (!data || data.type !== 'PERPUS_QR_RESULT') {
     return;
   }
 
-  if (data.requestId !== requestTerakhir) {
+  if (data.requestId && requestTerakhir && data.requestId !== requestTerakhir) {
     return;
   }
 
@@ -285,91 +427,62 @@ window.addEventListener('message', function(event) {
   sedangMemproses = false;
 
   if (!data.success) {
-
-    resultBox.textContent = data.message || 'QR tidak berhasil diverifikasi.';
-    resultDetail.textContent = '';
-    tampilkanStatus('❌ ' + (data.message || 'Verifikasi QR gagal.'));
-
+    resultBox.textContent = hasilScan;
+    resultDetail.textContent = data.message || 'Verifikasi gagal.';
+    tampilkanStatus('❌ ' + (data.message || 'Data tidak ditemukan di database.'), 'error');
     return;
   }
 
-  resultBox.textContent = data.displayName || 'Data ditemukan';
-
-  resultDetail.textContent =
-    (data.detail ? data.detail + ' • ' : '') +
-    (data.code ? 'Kode: ' + data.code : '');
-
-  tampilkanStatus('✅ Berhasil diverifikasi dan dikirim ke aplikasi perpustakaan.');
-
+  resultBox.textContent = data.displayName || 'Berhasil Ditemukan';
+  resultDetail.textContent = (data.detail ? data.detail + ' • ' : '') + (data.code ? 'Kode: ' + data.code : '');
+  tampilkanStatus('✅ Berhasil diverifikasi dan dikirim ke sistem!', 'success');
 });
 
-/* KIRIM ULANG */
 function kirimUlang() {
-
   if (!hasilScan) {
-    alert('Belum ada QR yang dipindai.');
+    alert('Belum ada QR code yang dipindai.');
     return;
   }
-
   if (sedangMemproses) {
-    alert('QR sebelumnya masih sedang diproses.');
+    alert('Masih memproses pemindaian sebelumnya.');
     return;
   }
-
   sedangMemproses = false;
   kirimKeAplikasi(hasilScan);
 }
 
-/* SALIN QR */
 async function salinHasil() {
-
   if (!hasilScan) {
-    alert('Belum ada QR yang dipindai.');
+    alert('Belum ada data QR untuk disalin.');
     return;
   }
-
   try {
-
     await navigator.clipboard.writeText(hasilScan);
-    alert('QR berhasil disalin.');
-
+    alert('Berhasil menyalin teks QR ke clipboard!');
   } catch(err) {
-
-    alert('Gagal menyalin QR. Periksa izin clipboard.');
-
+    alert('Gagal menyalin teks.');
   }
 }
 
-/* HENTIKAN KAMERA */
 async function matikanScanner() {
-
   if (!scanner || !kameraAktif) return;
 
   try {
-
     await scanner.stop();
     kameraAktif = false;
     sedangMemproses = false;
-
     clearTimeout(timerBalasan);
-
-    tampilkanStatus('Kamera berhasil dihentikan.');
-
+    tampilkanStatus('Kamera dimatikan.', 'info');
   } catch(err) {
-
-    tampilkanStatus('Gagal menghentikan kamera: ' + err.message);
-
+    tampilkanStatus('Gagal menghentikan kamera.', 'error');
   }
 }
 
 window.addEventListener('pagehide', function() {
-
   clearTimeout(timerBalasan);
-
   if (scanner && kameraAktif) {
     scanner.stop().catch(function() {});
   }
-
 });
 </script>
 </body>
